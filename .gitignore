@@ -1,0 +1,70 @@
+# 编译输出
+/backend/target/
+/backend/.idea/
+/backend/*.iml
+/backend/*.iws
+/backend/*.ipr
+/backend/.mvn/
+/backend/mvnw
+/backend/mvnw.cmd
+
+# 依赖
+/backend/.m2/
+
+# 环境配置
+/backend/.env
+/backend/.env.local
+/backend/.env.development.local
+/backend/.env.test.local
+/backend/.env.production.local
+
+# 日志
+/backend/logs/
+/backend/*.log
+
+# 临时文件
+/backend/temp/
+/backend/uploads/
+/backend/audio/
+/backend/subtitles/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 操作系统
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 前端
+/frontend/node_modules/
+/frontend/dist/
+/frontend/build/
+
+# 测试覆盖率
+/coverage/
+
+# npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 环境变量文件
+.env
+.env.development
+.env.production
+
+# 数据库数据（如果有）
+/data/
+/database/
+
+# 临时文件
+/tmp/
+/temp/

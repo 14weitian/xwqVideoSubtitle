@@ -1,0 +1,102 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: subtitle-generator-backend
+
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/subtitle_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8
+    username: subtitle
+    password: subtitle123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+      enabled: true
+
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+  # 异步任务配置
+  task:
+    execution:
+      pool:
+        core-size: 5
+        max-size: 10
+        queue-capacity: 100
+        name-prefix: async-task-
+      thread-name-prefix: subtitle-async-
+    scheduling:
+      pool-size: 5
+    thread-name-prefix: subtitle-schedule-
+
+# MyBatis-Plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath:mapper/*.xml
+
+# 日志配置
+logging:
+  level:
+    com.subtitle: debug
+    org.springframework.web: debug
+    com.baomidou.mybatisplus: debug
+
+# 应用配置
+app:
+  # 文件存储路径
+  upload-path: /Users/hewei/myProject/backend/uploads
+  # 视频文件存储路径
+  video-path: ${app.upload-path}/videos
+  # 音频文件存储路径
+  audio-path: ${app.upload-path}/audio
+  # 字幕文件存储路径
+  subtitle-path: ${app.upload-path}/subtitles
+  # 临时文件存储路径
+  temp-path: ${app.upload-path}/temp
+  # 允许的视频格式
+  allowed-video-formats: mp4,avi,mkv,mov,wmv,flv
+  # 最大视频文件大小（字节）
+  max-video-size: 524288000  # 500MB
+
+  # STT服务配置
+  stt:
+    provider: azure  # 可选值: azure, whisper, google
+    azure:
+      key: ${AZURE_SPEECH_KEY}
+      region: ${AZURE_SPEECH_REGION}
+      endpoint: ${AZURE_SPEECH_ENDPOINT}
+    whisper:
+      api-key: ${OPENAI_API_KEY}
+      model: whisper-1
+      language: zh-CN
+    google:
+      credentials-path: ${GOOGLE_APPLICATION_CREDENTIALS}
+      language: zh-CN
+
+# Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
