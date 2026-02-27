@@ -39,11 +39,13 @@ public class SubtitleController {
                 return ApiResponse.error(404, "视频不存在");
             }
 
-            // 异步生成字幕
-            subtitleService.generateSubtitleAsync(generateDTO.getVideoId(), generateDTO);
+            // 生成任务ID
+            String taskId = "subtitle_" + System.currentTimeMillis();
+
+            // 异步生成字幕，传入taskId
+            subtitleService.generateSubtitleAsync(taskId, generateDTO.getVideoId(), generateDTO);
 
             // 返回任务ID供客户端查询进度
-            String taskId = "subtitle_" + System.currentTimeMillis();
             return ApiResponse.success(taskId, "字幕生成任务已启动，请使用任务ID查询进度");
         } catch (Exception e) {
             return ApiResponse.error(500, "启动字幕生成失败: " + e.getMessage());

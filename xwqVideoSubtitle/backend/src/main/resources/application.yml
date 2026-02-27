@@ -95,18 +95,25 @@ app:
 
   # STT服务配置
   stt:
-    provider: azure  # 可选值: azure, whisper, google
+    provider: whisper  # 可选值: azure, whisper, google, zhipu
     azure:
       key: ${AZURE_SPEECH_KEY}
       region: ${AZURE_SPEECH_REGION}
       endpoint: ${AZURE_SPEECH_ENDPOINT}
     whisper:
-      api-key: ${OPENAI_API_KEY}
+      api-key: ${OPENAI_API_KEY:your_openai_api_key_here}
+      endpoint: https://api.openai.com/v1/audio/transcriptions
       model: whisper-1
-      language: zh-CN
+      timeout: 120000
     google:
       credentials-path: ${GOOGLE_APPLICATION_CREDENTIALS}
       language: zh-CN
+    zhipu:
+      api-key: ${ZHIPU_API_KEY:your_zhipu_api_key_here}
+      endpoint: https://open.bigmodel.cn/api/paas/v4/audio/transcriptions
+      model: glm-asr
+      language: zh
+      timeout: 60000
 
 # Actuator配置
 management:

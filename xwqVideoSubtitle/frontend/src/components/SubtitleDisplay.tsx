@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { subtitleApi, systemApi } from '../services/api';
 import { useAppStore } from '../store';
-import type { LanguageOption, Subtitle, SubtitleSegment } from '../types';
+import type { LanguageOption, Subtitle, SubtitleSegment, TaskRecord } from '../types';
 
 const SubtitleDisplay: React.FC = () => {
   const { currentVideo, currentSubtitles, updateTask } = useAppStore();
@@ -11,6 +11,12 @@ const SubtitleDisplay: React.FC = () => {
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(-1);
   const [languages] = useState<LanguageOption[]>(systemApi.getLanguages());
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // 任务进度相关状态
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [taskProgress, setTaskProgress] = useState(0);
+  const [taskMessage, setTaskMessage] = useState('');
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentVideo) {
@@ -46,26 +52,64 @@ const SubtitleDisplay: React.FC = () => {
     if (!currentVideo) return;
 
     try {
-      const taskId = await subtitleApi.generate(currentVideo.id, 'zh-CN');
+      setIsGenerating(true);
+      setTaskProgress(0);
+      setTaskMessage('正在启动字幕生成任务...');
+
+      // 使用 'auto' 让后端自动检测语言
+      const taskId = await subtitleApi.generate(currentVideo.id, 'auto');
+      setCurrentTaskId(taskId);
 
       // 定期检查任务状态
       const checkStatus = setInterval(async () => {
         try {
-          const task = await subtitleApi.getTaskStatus(taskId);
+          const task: TaskRecord = await subtitleApi.getTaskStatus(taskId);
           updateTask(taskId, task);
+
+          // 更新进度和消息
+          setTaskProgress(task.progress || 0);
+
+          // 显示后端返回的消息，如果没有则显示默认消息
+          if (task.message) {
+            setTaskMessage(task.message);
+          } else if (task.progress < 100) {
+            setTaskMessage('处理中...');
+          }
 
           if (task.status === 1) { // 完成
             clearInterval(checkStatus);
+            setIsGenerating(false);
+            setTaskProgress(100);
+            setTaskMessage('字幕生成完成！');
             loadSubtitles(); // 重新加载字幕
+
+            // 3秒后清除提示
+            setTimeout(() => {
+              setTaskMessage('');
+              setCurrentTaskId(null);
+            }, 3000);
           } else if (task.status === 2) { // 失败
             clearInterval(checkStatus);
+            setIsGenerating(false);
+            // 优先显示errorMessage，其次显示message
+            const errorMsg = task.errorMessage || task.message || '未知错误';
+            setTaskMessage(errorMsg);
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('检查任务状态失败:', error);
+          clearInterval(checkStatus);
+          setIsGenerating(false);
+          // 显示后端返回的错误信息
+          const errorMsg = error?.response?.data?.message || error?.message || '检查任务状态失败';
+          setTaskMessage(errorMsg);
         }
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('启动字幕生成失败:', error);
+      setIsGenerating(false);
+      // 显示后端返回的错误信息
+      const errorMsg = error?.response?.data?.message || error?.message || '启动字幕生成失败';
+      setTaskMessage(errorMsg);
     }
   };
 
@@ -100,13 +144,79 @@ const SubtitleDisplay: React.FC = () => {
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">字幕管理</h2>
-        <button
-          onClick={generateSubtitle}
-          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
-        >
-          生成字幕
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* 生成字幕按钮 */}
+          <button
+            onClick={generateSubtitle}
+            disabled={isGenerating}
+            className={`
+              px-4 py-2 rounded-md transition-colors whitespace-nowrap
+              ${isGenerating
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                : 'bg-green-600 text-white hover:bg-green-700'}
+            `}
+          >
+            {isGenerating ? '生成中...' : '生成字幕'}
+          </button>
+        </div>
       </div>
+
+      {/* 进度条 */}
+      {isGenerating && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-blue-900">字幕生成进度</span>
+            <span className="text-sm font-bold text-blue-600">{taskProgress}%</span>
+          </div>
+          <div className="w-full bg-blue-200 rounded-full h-3 overflow-hidden">
+            <div
+              className="bg-blue-600 h-full rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${taskProgress}%` }}
+            />
+          </div>
+          <p className="mt-2 text-sm text-blue-700">{taskMessage}</p>
+        </div>
+      )}
+
+      {/* 完成提示 */}
+      {!isGenerating && taskMessage && taskProgress === 100 && (
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="text-green-800 font-medium">{taskMessage}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 错误提示 */}
+      {!isGenerating && taskMessage && (taskProgress < 100 || taskMessage.includes('失败') || taskMessage.includes('错误')) && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <svg className="w-5 h-5 text-red-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-red-800 font-medium mb-1">字幕生成失败</p>
+              <p className="text-red-700 text-sm">{taskMessage}</p>
+            </div>
+            <button
+              onClick={() => {
+                setTaskMessage('');
+                setCurrentTaskId(null);
+                setTaskProgress(0);
+              }}
+              className="text-red-600 hover:text-red-800 ml-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 字幕列表 */}
       <div className="mb-6">

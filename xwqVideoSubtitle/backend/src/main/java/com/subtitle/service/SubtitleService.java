@@ -13,6 +13,8 @@ import com.subtitle.utils.AudioExtractor;
 import com.subtitle.utils.SubtitleFormatConverter;
 import com.subtitle.dto.ApiResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,8 @@ import java.util.stream.Collectors;
 @Service
 public class SubtitleService {
 
+    private static final Logger logger = LoggerFactory.getLogger(SubtitleService.class);
+
     @Autowired
     private SubtitleMapper subtitleMapper;
 
@@ -46,8 +50,7 @@ public class SubtitleService {
      * 异步生成字幕
      */
     @Async
-    public CompletableFuture<ApiResponse<Subtitle>> generateSubtitleAsync(Long videoId, SubtitleGenerateDTO generateDTO) {
-        String taskId = "subtitle_" + System.currentTimeMillis();
+    public CompletableFuture<ApiResponse<Subtitle>> generateSubtitleAsync(String taskId, Long videoId, SubtitleGenerateDTO generateDTO) {
         try {
             // 获取视频信息
             Video video = videoMapper.selectById(videoId);
@@ -128,21 +131,44 @@ public class SubtitleService {
      * 提取音频
      */
     private String extractAudio(Video video) {
+        logger.info("开始提取音频 - 视频ID: {}, 视频路径: {}", video.getId(), video.getFilePath());
+
         String audioFilename = video.getId() + ".wav";
         String audioPath = Paths.get(getAppConfig().getAudioPath(), audioFilename).toString();
+
+        logger.info("音频输出路径: {}", audioPath);
 
         // 确保音频目录存在
         File audioDir = new File(getAppConfig().getAudioPath());
         if (!audioDir.exists()) {
-            audioDir.mkdirs();
+            boolean created = audioDir.mkdirs();
+            logger.info("创建音频目录: {}, 结果: {}", audioDir.getAbsolutePath(), created);
+        }
+
+        // 检查视频文件是否存在
+        File videoFile = new File(video.getFilePath());
+        if (!videoFile.exists()) {
+            logger.error("视频文件不存在: {}", video.getFilePath());
+            throw new RuntimeException("视频文件不存在: " + video.getFilePath());
+        }
+
+        logger.info("视频文件大小: {} bytes", videoFile.length());
+
+        // 检查视频是否包含音频
+        if (!AudioExtractor.hasAudio(video.getFilePath())) {
+            logger.error("视频文件不包含音频流: {}", video.getFilePath());
+            throw new RuntimeException("视频文件不包含音频流");
         }
 
         // 提取音频
         boolean success = AudioExtractor.extractAudio(video.getFilePath(), audioPath);
         if (success) {
+            logger.info("音频提取成功: {}", audioPath);
             return audioPath;
+        } else {
+            logger.error("音频提取失败");
+            throw new RuntimeException("音频提取失败");
         }
-        return null;
     }
 
     /**
@@ -213,6 +239,12 @@ public class SubtitleService {
                 task.setProgress(progress);
             }
             task.setMessage(message);
+
+            // 如果是失败状态，同时设置errorMessage
+            if (status == 2) {
+                task.setErrorMessage(message);
+            }
+
             taskRecordMapper.updateById(task);
         }
     }
