@@ -78,8 +78,8 @@ logging:
 
 # 应用配置
 app:
-  # 文件存储路径
-  upload-path: /Users/hewei/myProject/backend/uploads
+  # 文件存储路径（相对路径，基于项目根目录）
+  upload-path: ./uploads
   # 视频文件存储路径
   video-path: ${app.upload-path}/videos
   # 音频文件存储路径
