@@ -1,7 +1,12 @@
 import { create } from 'zustand';
-import type { Video, Subtitle, TaskRecord } from '../types';
+import type { Video, Subtitle, TaskRecord, User } from '../types';
 
 interface AppStore {
+  // 用户状态
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+
   // 状态
   videos: Video[];
   subtitles: Subtitle[];
@@ -17,8 +22,15 @@ interface AppStore {
   // 错误信息
   error: string | null;
 
+  // 用户 Actions
+  setUser: (user: User | null) => void;
+  setToken: (token: string | null) => void;
+  login: (token: string, user: User) => void;
+  logout: () => void;
+
   // Actions
   setVideos: (videos: Video[]) => void;
+  setCurrentVideo: (video: Video | null) => void;
   setVideo: (video: Video) => void;
   addVideo: (video: Video) => void;
   removeVideo: (id: number) => void;
@@ -40,8 +52,12 @@ interface AppStore {
   reset: () => void;
 }
 
-export const useAppStore = create<AppStore>((set, get) => ({
-  // 初始状态
+export const useAppStore = create<AppStore>((set) => ({
+  // 初始状态 - 从 localStorage 恢复用户状态
+  user: null,
+  token: localStorage.getItem('token'),
+  isAuthenticated: !!localStorage.getItem('token'),
+
   videos: [],
   subtitles: [],
   currentVideo: null,
@@ -54,8 +70,37 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   error: null,
 
+  // 用户 Actions
+  setUser: (user) => set({ user, isAuthenticated: !!user }),
+  setToken: (token) => {
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+    set({ token, isAuthenticated: !!token });
+  },
+  login: (token, user) => {
+    localStorage.setItem('token', token);
+    set({ token, user, isAuthenticated: true });
+  },
+  logout: () => {
+    localStorage.removeItem('token');
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      videos: [],
+      subtitles: [],
+      currentVideo: null,
+      currentSubtitles: [],
+      tasks: [],
+    });
+  },
+
   // Actions
   setVideos: (videos) => set({ videos }),
+  setCurrentVideo: (video) => set({ currentVideo: video }),
   setVideo: (video) => set({ currentVideo: video }),
   addVideo: (video) => set((state) => ({ videos: [...state.videos, video] })),
   removeVideo: (id) => set((state) => ({

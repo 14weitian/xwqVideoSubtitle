@@ -1,5 +1,6 @@
 package com.subtitle.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.subtitle.entity.Video;
 import com.subtitle.dto.VideoUploadDTO;
 import com.subtitle.mapper.VideoMapper;
@@ -30,7 +31,7 @@ public class VideoServiceImpl implements VideoService {
     private AppConfig appConfig;
 
     @Override
-    public Video uploadVideo(MultipartFile file, VideoUploadDTO uploadDTO) {
+    public Video uploadVideo(MultipartFile file, VideoUploadDTO uploadDTO, Long userId) {
         // 验证文件
         String validationResult = validateVideoFile(file);
         if (validationResult != null) {
@@ -62,6 +63,7 @@ public class VideoServiceImpl implements VideoService {
 
         // 创建视频记录
         Video video = new Video();
+        video.setUserId(userId);
         video.setTitle(StringUtils.hasText(uploadDTO.getTitle()) ? uploadDTO.getTitle() :
                      originalFilename.substring(0, originalFilename.lastIndexOf(".")));
         video.setFileName(originalFilename);
@@ -87,8 +89,11 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public List<Video> getAllVideos() {
-        return videoMapper.selectList(null);
+    public List<Video> getAllVideos(Long userId) {
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Video::getUserId, userId);
+        queryWrapper.orderByDesc(Video::getCreatedAt);
+        return videoMapper.selectList(queryWrapper);
     }
 
     @Override

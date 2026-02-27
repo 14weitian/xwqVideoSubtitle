@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { videoApi } from '../services/api';
 import { useAppStore } from '../store';
-import type { Video } from '../types';
 
 const VideoUpload: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -10,7 +9,7 @@ const VideoUpload: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { addVideo, setUploading, setError } = useAppStore();
+  const { addVideo, setUploading, setError, uploading } = useAppStore();
 
   const onDrop = async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -34,7 +33,6 @@ const VideoUpload: React.FC = () => {
 
     } catch (error: any) {
       setError(error.message || '上传失败');
-      console.error('上传错误:', error);
     } finally {
       setUploading(false);
     }

@@ -11,38 +11,28 @@ import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
+/**
+ * 邮箱验证码实体类
+ */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("videos")
-public class Video {
+@TableName("email_verification_codes")
+public class EmailVerificationCode {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private Long userId;
+    private String email;
 
-    private String title;
+    private String code;
 
-    private String fileName;
+    private String type;  // PASSWORD_RESET
 
-    private String filePath;
+    private Integer status;  // 1-未使用，2-已使用，0-已过期
 
-    private Long fileSize;
-
-    private String duration;
-
-    private String format;
-
-    private Integer status;
-
-    private Integer progress;
-
-    private String errorMessage;
+    private LocalDateTime expiresAt;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
-
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updatedAt;
 }

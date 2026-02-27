@@ -11,34 +11,29 @@ import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
+/**
+ * 用户实体类
+ */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("videos")
-public class Video {
+@TableName("users")
+public class User {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private Long userId;
+    private String username;
 
-    private String title;
+    private String email;
 
-    private String fileName;
+    private String avatar;  // 用户头像路径
 
-    private String filePath;
+    private String password;
 
-    private Long fileSize;
-
-    private String duration;
-
-    private String format;
+    private String nickname;
 
     private Integer status;
-
-    private Integer progress;
-
-    private String errorMessage;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;

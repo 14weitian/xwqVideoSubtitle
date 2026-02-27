@@ -47,6 +47,7 @@ public class SubtitleService {
      */
     @Async
     public CompletableFuture<ApiResponse<Subtitle>> generateSubtitleAsync(Long videoId, SubtitleGenerateDTO generateDTO) {
+        String taskId = "subtitle_" + System.currentTimeMillis();
         try {
             // 获取视频信息
             Video video = videoMapper.selectById(videoId);
@@ -55,7 +56,6 @@ public class SubtitleService {
             }
 
             // 创建任务记录
-            String taskId = "subtitle_" + System.currentTimeMillis();
             TaskRecord task = new TaskRecord();
             task.setTaskId(taskId);
             task.setTaskType("subtitle_generate");

@@ -1,70 +1,48 @@
-# 编译输出
-/backend/target/
-/backend/.idea/
-/backend/*.iml
-/backend/*.iws
-/backend/*.ipr
-/backend/.mvn/
-/backend/mvnw
-/backend/mvnw.cmd
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
 
-# 依赖
-/backend/.m2/
-
-# 环境配置
-/backend/.env
-/backend/.env.local
-/backend/.env.development.local
-/backend/.env.test.local
-/backend/.env.production.local
-
-# 日志
-/backend/logs/
-/backend/*.log
-
-# 临时文件
-/backend/temp/
-/backend/uploads/
-/backend/audio/
-/backend/subtitles/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# 操作系统
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# 前端
-/frontend/node_modules/
-/frontend/dist/
-/frontend/build/
-
-# 测试覆盖率
-/coverage/
-
-# npm
+# Node
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# 环境变量文件
-.env
-.env.development
-.env.production
+# 编译输出
+*.class
+*.jar
+*.war
+*.ear
+*.dylib
+*.so
+*.dll
 
-# 数据库数据（如果有）
-/data/
-/database/
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.DS_Store
+
+# 日志
+*.log
 
 # 临时文件
-/tmp/
-/temp/
+*.tmp
+*.swp
+*~
+${project.build.directory}/
+
+# 环境变量
+.env
+.env.local

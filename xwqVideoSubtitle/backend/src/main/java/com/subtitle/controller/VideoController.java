@@ -4,6 +4,7 @@ import com.subtitle.entity.Video;
 import com.subtitle.dto.VideoUploadDTO;
 import com.subtitle.dto.ApiResponse;
 import com.subtitle.service.VideoService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,13 +25,16 @@ public class VideoController {
     @PostMapping("/upload")
     public ApiResponse<Video> uploadVideo(@RequestParam("file") MultipartFile file,
                                          @RequestParam(value = "title", required = false) String title,
-                                         @RequestParam(value = "language", defaultValue = "zh-CN") String language) {
+                                         @RequestParam(value = "language", defaultValue = "zh-CN") String language,
+                                         HttpServletRequest request) {
         try {
+            Long userId = (Long) request.getAttribute("userId");
+
             VideoUploadDTO uploadDTO = new VideoUploadDTO();
             uploadDTO.setTitle(title);
             uploadDTO.setLanguage(language);
 
-            Video video = videoService.uploadVideo(file, uploadDTO);
+            Video video = videoService.uploadVideo(file, uploadDTO, userId);
             return ApiResponse.success(video, "视频上传成功");
         } catch (Exception e) {
             return ApiResponse.error(500, "视频上传失败: " + e.getMessage());
@@ -41,9 +45,10 @@ public class VideoController {
      * 获取视频列表
      */
     @GetMapping
-    public ApiResponse<List<Video>> getAllVideos() {
+    public ApiResponse<List<Video>> getAllVideos(HttpServletRequest request) {
         try {
-            List<Video> videos = videoService.getAllVideos();
+            Long userId = (Long) request.getAttribute("userId");
+            List<Video> videos = videoService.getAllVideos(userId);
             return ApiResponse.success(videos);
         } catch (Exception e) {
             return ApiResponse.error(500, "获取视频列表失败: " + e.getMessage());

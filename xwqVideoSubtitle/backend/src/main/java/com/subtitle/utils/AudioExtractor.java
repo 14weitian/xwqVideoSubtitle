@@ -1,5 +1,6 @@
 package com.subtitle.utils;
 
+import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
@@ -37,7 +38,7 @@ public class AudioExtractor {
             }
 
             try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(audioPath, 1, 16000)) {
-                recorder.setAudioCodec(FrameRecorder.AUDIO_CODEC_PCM_S16LE);
+                recorder.setAudioCodec(avcodec.AV_CODEC_ID_PCM_S16LE);
                 recorder.setFormat("wav");
                 recorder.start();
 

@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
   servlet:
     context-path: /api
 
@@ -38,6 +38,23 @@ spring:
     scheduling:
       pool-size: 5
     thread-name-prefix: subtitle-schedule-
+
+  # 邮件配置
+  mail:
+    host: ${MAIL_HOST:smtp.163.com}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME:hewe1i1@163.com}
+    password: ${MAIL_PASSWORD:MLTb64q99dMsE8ft}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+            port: 465
+    default-encoding: UTF-8
 
 # MyBatis-Plus配置
 mybatis-plus:
@@ -100,3 +117,8 @@ management:
   endpoint:
     health:
       show-details: always
+
+# JWT 配置
+jwt:
+  secret: YourSecretKeyForJWTTokenGenerationMustBeVeryLong123456
+  expiration: 86400000  # 24小时（毫秒）

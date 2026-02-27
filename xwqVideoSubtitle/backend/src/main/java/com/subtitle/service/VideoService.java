@@ -12,9 +12,10 @@ public interface VideoService {
      * 上传视频文件
      * @param file 视频文件
      * @param uploadDTO 上传参数
+     * @param userId 用户ID
      * @return 视频信息
      */
-    Video uploadVideo(MultipartFile file, VideoUploadDTO uploadDTO);
+    Video uploadVideo(MultipartFile file, VideoUploadDTO uploadDTO, Long userId);
 
     /**
      * 根据ID获取视频
@@ -25,9 +26,10 @@ public interface VideoService {
 
     /**
      * 获取所有视频
+     * @param userId 用户ID
      * @return 视频列表
      */
-    List<Video> getAllVideos();
+    List<Video> getAllVideos(Long userId);
 
     /**
      * 删除视频

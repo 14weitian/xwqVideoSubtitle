@@ -1,6 +1,51 @@
+// 用户类型定义
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  avatar?: string;  // 用户头像路径
+  nickname: string;
+  status: number;
+  createdAt: string;
+}
+
+// 登录请求
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+// 注册请求
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  nickname?: string;
+}
+
+// 登录响应
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+// 修改密码请求
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+// 更新用户信息请求
+export interface UpdateProfileRequest {
+  nickname?: string;
+  email?: string;
+}
+
 // 视频类型定义
 export interface Video {
   id: number;
+  userId?: number;
   title: string;
   fileName: string;
   filePath: string;

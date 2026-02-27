@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { subtitleApi, systemApi } from '../services/api';
 import { useAppStore } from '../store';
-import type { Subtitle, SubtitleSegment, LanguageOption } from '../types';
+import type { LanguageOption, Subtitle, SubtitleSegment } from '../types';
 
 const SubtitleDisplay: React.FC = () => {
   const { currentVideo, currentSubtitles, updateTask } = useAppStore();
@@ -47,7 +47,6 @@ const SubtitleDisplay: React.FC = () => {
 
     try {
       const taskId = await subtitleApi.generate(currentVideo.id, 'zh-CN');
-      console.log('生成任务已启动，任务ID:', taskId);
 
       // 定期检查任务状态
       const checkStatus = setInterval(async () => {
@@ -60,7 +59,6 @@ const SubtitleDisplay: React.FC = () => {
             loadSubtitles(); // 重新加载字幕
           } else if (task.status === 2) { // 失败
             clearInterval(checkStatus);
-            console.error('字幕生成失败:', task.errorMessage);
           }
         } catch (error) {
           console.error('检查任务状态失败:', error);
@@ -133,9 +131,8 @@ const SubtitleDisplay: React.FC = () => {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                    subtitle.status === 1 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
+                  <span className={`inline-block px-2 py-1 text-xs rounded-full ${subtitle.status === 1 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
                     {subtitle.status === 1 ? '完成' : '处理中'}
                   </span>
                 </div>
@@ -173,9 +170,8 @@ const SubtitleDisplay: React.FC = () => {
             {segments.map((segment, index) => (
               <div
                 key={index}
-                className={`mb-4 p-2 rounded ${
-                  currentSegmentIndex === index ? 'bg-blue-100' : ''
-                }`}
+                className={`mb-4 p-2 rounded ${currentSegmentIndex === index ? 'bg-blue-100' : ''
+                  }`}
               >
                 <div className="text-sm text-gray-500 mb-1">
                   {formatTime(segment.startTime)} - {formatTime(segment.endTime)}
